@@ -1,0 +1,34 @@
+# Dependencies
+/external/*/*
+!/external/*/CMakeLists.txt
+
+# CMake
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+# Build
+[Dd]ebug/
+[Rr]elease/
+*.exe
+*.ilk
+*.pdb
+/modurale
+/tests
+
+# CLion
+.idea
+
+# Visual Studio
+*.sln
+*.sdf
+*.opensdf
+*.suo
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# Windows
+Thumbs.db
