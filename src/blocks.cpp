@@ -77,5 +77,5 @@ void Blocks::Random()
 	// loop over all blocks
 	for (size_t i = 0; i < x; ++i)
 	for (size_t j = 0; j < y; ++j)
-		blocks[i][j] = rand() % 2;
+		blocks[i][j] = rand() % 100 < 25;
 }

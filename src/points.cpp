@@ -6,14 +6,14 @@ using namespace std;
 using namespace glm;
 
 
-Points::Points(Blocks *Blocks) : m_blocks(Blocks)
+Points::Points(Blocks *blocks) : m_blocks(blocks)
 {
 
 }
 
-bool Points::check(ivec2 block)
+bool Points::check_old(ivec2 block)
 {
-	// fetch neighbours
+	// Fetch neighbours
 	bool center = m_blocks->Is(block.x, block.y);
 	bool topleft = m_blocks->Is(block.x - 1, block.y - 1);
 	bool top = m_blocks->Is(block.x + 0, block.y - 1);
@@ -25,19 +25,19 @@ bool Points::check(ivec2 block)
 	bool left = m_blocks->Is(block.x - 1, block.y + 0);
 	bool *neighbours[] = { &bottomleft, &left, &topleft, &top, &topright, &right, &bottomright, &bottom, &bottomleft, &left, &topleft, &top };
 
-	// is set
+	// Is set
 	if (center)
 		return true;
 
-	// is not set
+	// Is not set
 	else {
-		// iterate over edges
+		// Iterate over edges
 		for (int i = 3; i < 10; i += 2) {
-			// get current and adjacent
+			// Get current and adjacent
 			bool *current = neighbours[i];
 			bool *overnext = neighbours[i + 2];
 
-			// found consecutive edges
+			// Found consecutive edges
 			if (*current && *overnext)
 				return true;
 		}
@@ -46,66 +46,66 @@ bool Points::check(ivec2 block)
 	return false;
 }
 
-list<dvec2> Points::find(ivec2 block)
+list<dvec2> Points::find_old(ivec2 block)
 {
-	// control points
+	// Control points
 	list<dvec2> points;
-
-	// early skip
-	if (!check(block))
+	/*
+	// Early skip
+	if (!check_old(block))
 		return points;
 
-	// fetch neighbours
-	bool center      = m_blocks->Is(block.x, block.y);
-	bool topleft     = m_blocks->Is(block.x - 1, block.y - 1);
-	bool top         = m_blocks->Is(block.x + 0, block.y - 1);
-	bool topright    = m_blocks->Is(block.x + 1, block.y - 1);
-	bool right       = m_blocks->Is(block.x + 1, block.y + 0);
+	// Fetch neighbours
+	bool center = m_blocks->Is(block.x, block.y);
+	bool topleft = m_blocks->Is(block.x - 1, block.y - 1);
+	bool top = m_blocks->Is(block.x + 0, block.y - 1);
+	bool topright = m_blocks->Is(block.x + 1, block.y - 1);
+	bool right = m_blocks->Is(block.x + 1, block.y + 0);
 	bool bottomright = m_blocks->Is(block.x + 1, block.y + 1);
-	bool bottom      = m_blocks->Is(block.x + 0, block.y + 1);
-	bool bottomleft  = m_blocks->Is(block.x - 1, block.y + 1);
-	bool left        = m_blocks->Is(block.x - 1, block.y + 0);
+	bool bottom = m_blocks->Is(block.x + 0, block.y + 1);
+	bool bottomleft = m_blocks->Is(block.x - 1, block.y + 1);
+	bool left = m_blocks->Is(block.x - 1, block.y + 0);
 	bool *neighbours[] = { &bottomleft, &left, &topleft, &top, &topright, &right, &bottomright, &bottom, &bottomleft, &left, &topleft, &top };
 
-	// iterate over corners
+	// Iterate over corners
 	for (int i = 2; i < 10; i += 2) {
-		// get current and adjacent
+		// Get current and adjacent
 		bool *previous = neighbours[i - 1];
-		bool *current  = neighbours[i];
-		bool *next     = neighbours[i + 1];
+		bool *current = neighbours[i];
+		bool *next = neighbours[i + 1];
 
-		// skip neighbours of center type
+		// Skip neighbours of center type
 		if (*current == center)
 			continue;
 
-		// skip points inside shape
+		// Skip points inside shape
 		if (!*current && ((*neighbours[i - 1] && *neighbours[i + 2]) || (*neighbours[i + 1] && *neighbours[i - 2]))) {
 			*current = !center;
 			continue;
 		}
 
-		// skip lonely or enclosed neighbours
+		// Skip lonely or enclosed neighbours
 		if (*previous == *next) {
 			*current = !center;
 			continue;
 		}
 
-		// add point
+		// Add point
 		points.push_back(pointTowards(i - 2));
 	}
 
-	// iterate over sides
+	// Iterate over sides
 	for (int i = 3; i < 10; i += 2) {
-		// get current and adjacent
+		// Get current and adjacent
 		bool *previous = neighbours[i - 1];
 		bool *current = neighbours[i];
 		bool *next = neighbours[i + 1];
 
-		// skip neighbours of center type
+		// Skip neighbours of center type
 		if (*current == center)
 			continue;
-		
-		// skip points inside shape
+
+		// Skip points inside shape
 		if (center && (*previous && *next))
 			continue;
 		if (!*current && ((*neighbours[i - 1] && *neighbours[i + 2]) || (*neighbours[i + 1] && *neighbours[i - 2]))) {
@@ -113,21 +113,113 @@ list<dvec2> Points::find(ivec2 block)
 			continue;
 		}
 
-		// skip lonely or enclosed neighbours
-		// except a surrounding edge equals
+		// Skip lonely or enclosed neighbours
+		// Except a surrounding edge equals
 		if (*previous == *next && *current != *neighbours[i - 2] && *current != *neighbours[i + 2]) {
 			*current = !center;
 			continue;
 		}
 
-		// add point
+		// Add point
 		points.push_back(pointTowards(i - 2));
 	}
-
+	*/
 	return points;
 }
 
-dvec2 Points::pointTowards(int i)
+list<list<dvec2>> Points::find(ivec2 block)
+{
+	// Control points
+	list<list<dvec2>> lines;
+	list<dvec2> *line = nullptr;
+	
+	// Fetch blocks, neighbours start top left and count
+	// around the center block clock wise
+	int center = m_blocks->Get(block.x, block.y);
+	int neighs[8];
+	for (int i = 0; i < 8; i++) {
+		auto coord = blockFromIndex(i);
+		neighs[i] = m_blocks->Get(block.x + coord.x, block.y + coord.y);
+	}
+
+	// Iterate over neighbour blocks
+	for (int i = 0; i < 8; i++) {
+		int current = neighs[i];
+		int next = neighs[i + 1 % 8];
+		bool is_side = (i + 1 % 2 == 1);
+		bool is_corner = (i + 1 % 2 == 0);
+
+		if (line) {
+			// Border between air and ground needs a line
+			if (current != center) {
+				// Sides are cool, but corners get skipped when they don't
+				// stop a line
+				if (is_side || next == center) {
+					// Add point
+					line->push_back(pointTowards(blockFromIndex(i)));
+					// Merge last line with first if touching. This will not merge
+					// complete circles yet.
+					if (i == 7 && lines.size() > 1 && neighs[0] != center) {
+						lines.pop_back();
+						lines.front().pop_front(); // First neighbour was a corner that's now enclosed
+						while (line->size()) {
+							lines.front().push_front(line->back());
+							line->pop_back();
+						}
+					}
+				}
+			} else {
+				// Stop line since we found an end of the border
+				line = nullptr;
+			}
+		} else {
+			// Start a new line for the border between air and ground that
+			// just appeared. However, skips lines that would only have one
+			// point, so we have to look at the next block, too.
+			if (current != center && next != center) {
+				lines.emplace_back();
+				line = &lines.back();
+				line->push_back(pointTowards(blockFromIndex(i)));
+			}
+		}
+	}
+
+	return lines;
+}
+
+glm::ivec2 Points::blockFromIndex(int i)
+{
+	// Returns first positive representant, we need this so that the
+	// conditions below "wrap around"
+	auto modulo = [](int i, int n) { return (i % n + n) % n; };
+
+	ivec2 block(0, 0);
+	// For two indices, zero is right so skip
+	if (modulo(i - 1, 4))
+		// The others are either 1 or -1
+		block.x = modulo(i - 1, 8) / 4 ? -1 : 1;
+	// Other axis is same sequence but shifted
+	if (modulo(i - 3, 4))
+		block.y = modulo(i - 3, 8) / 4 ? -1 : 1;
+	return block;
+}
+
+dvec2 Points::pointTowards(ivec2 neighbour)
+{
+	dvec2 point;
+	point.x = static_cast<double>(neighbour.x);
+	point.y = static_cast<double>(neighbour.y);
+	point *= .85;
+
+	// Convert from neighbour space into
+	// drawing space of the block
+	point *= 0.5;
+	point += dvec2(.5);
+
+	return point;
+}
+
+dvec2 Points::pointTowards_old(int i)
 {
 	dvec2 point;
 	point.x = ((i + 7) % 8 < 4 ? 1 : -1) * ((i + 7) % 4 == 0 ? 0 : 1);

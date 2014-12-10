@@ -36,12 +36,19 @@ void Field::draw()
 				draw::square(m_image, coordinates(index.x), coordinates(index.y), 4);
 
 			// fetch points
-			auto pts = m_points.find(index);
+			auto lines = m_points.find(index);
 
 			// draw pts
-			if (pts.size())
-				for (auto point : pts)
-					draw::dot(m_image, coordinates(index.x, point.x), coordinates(index.y, point.y), 2);
+			for (auto line : lines) {
+				auto i = line.begin();
+				dvec2 last = *i;
+				draw::dot(m_image, coordinates(index.x, last.x), coordinates(index.y, last.y), 2);
+				for (++i; i != line.end(); ++i) {
+					draw::line(m_image, coordinates(index.x, last.x), coordinates(index.y, last.y), coordinates(index.x, i->x), coordinates(index.y, i->y));
+					draw::dot(m_image, coordinates(index.x, i->x), coordinates(index.y, i->y), 2);
+					last = *i;
+				}
+			}
 		}
 	}
 
