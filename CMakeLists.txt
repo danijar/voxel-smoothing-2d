@@ -139,8 +139,11 @@ endfunction()
 
 # Use function above
 add_subdirectory_and_build(sfml)
+add_subdirectory_and_build(glm)
 
 # Find and include headers and binaries of dependencies that match the
 # configuration and link them against the requiring targets
 include(UseSFML)
+include(UseGLM)
 use_sfml(${PROJECT_NAME})
+use_glm(${PROJECT_NAME})
