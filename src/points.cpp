@@ -145,29 +145,28 @@ list<list<dvec2>> Points::find(ivec2 block)
 	// Iterate over neighbour blocks
 	for (int i = 0; i < 8; i++) {
 		int current = neighs[i];
-		int next = neighs[i + 1 % 8];
-		bool is_side = (i + 1 % 2 == 1);
-		bool is_corner = (i + 1 % 2 == 0);
+		int next = neighs[(i + 1) % 8];
+		bool is_side   = (((i + 1) % 2) == 1);
+		bool is_corner = (((i + 1) % 2) == 0);
+
+		/*
+		// Merge last line with first if touching. This will not merge
+		// complete circles yet.
+		if (i == 7 && lines.size() > 1 && neighs[0] != center) {
+			//lines.pop_back();
+			//lines.front().pop_front(); // First neighbour was an enclosed corner
+			lines.front().insert(lines.front().begin(), line->begin(), line->end());
+			lines.pop_back();
+		}
+		*/
 
 		if (line) {
 			// Border between air and ground needs a line
 			if (current != center) {
 				// Sides are cool, but corners get skipped when they don't
 				// stop a line
-				if (is_side || next == center) {
-					// Add point
+				if (is_side || next == center)
 					line->push_back(pointTowards(blockFromIndex(i)));
-					// Merge last line with first if touching. This will not merge
-					// complete circles yet.
-					if (i == 7 && lines.size() > 1 && neighs[0] != center) {
-						lines.pop_back();
-						lines.front().pop_front(); // First neighbour was a corner that's now enclosed
-						while (line->size()) {
-							lines.front().push_front(line->back());
-							line->pop_back();
-						}
-					}
-				}
 			} else {
 				// Stop line since we found an end of the border
 				line = nullptr;
