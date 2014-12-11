@@ -130,8 +130,8 @@ list<dvec2> Points::find_old(ivec2 block)
 list<list<dvec2>> Points::find(ivec2 block)
 {
 	// Control points
-	list<list<dvec2>> lines;
-	list<dvec2> *line = nullptr;
+	list<list<ivec2>> lines;
+	list<ivec2> *line = nullptr;
 	
 	// Fetch blocks, neighbours start top left and count
 	// around the center block clock wise
@@ -149,25 +149,14 @@ list<list<dvec2>> Points::find(ivec2 block)
 		bool is_side   = (((i + 1) % 2) == 1);
 		bool is_corner = (((i + 1) % 2) == 0);
 
-		/*
-		// Merge last line with first if touching. This will not merge
-		// complete circles yet.
-		if (i == 7 && lines.size() > 1 && neighs[0] != center) {
-			//lines.pop_back();
-			//lines.front().pop_front(); // First neighbour was an enclosed corner
-			lines.front().insert(lines.front().begin(), line->begin(), line->end());
-			lines.pop_back();
-		}
-		*/
-
 		if (line) {
 			// Border between air and ground needs a line
 			if (current != center) {
 				// Sides are cool, but corners get skipped when they don't
 				// stop a line
 				if (is_side || next == center)
-					line->push_back(pointTowards(blockFromIndex(i)));
-			} else {
+					line->push_back(blockFromIndex(i));
+			} else if (is_side || next == center) {
 				// Stop line since we found an end of the border
 				line = nullptr;
 			}
@@ -178,12 +167,32 @@ list<list<dvec2>> Points::find(ivec2 block)
 			if (current != center && next != center) {
 				lines.emplace_back();
 				line = &lines.back();
-				line->push_back(pointTowards(blockFromIndex(i)));
+				line->push_back(blockFromIndex(i));
 			}
 		}
 	}
 
-	return lines;
+	// Merge last line with first if touching. This will not merge
+	// complete circles yet.
+	//lines.pop_back();
+	//lines.front().pop_front(); // First neighbour was an enclosed corner
+	if (neighs[0] != center && neighs[7] != center) {
+		if (lines.size() > 1) {
+			lines.front().insert(lines.front().begin(), line->begin(), line->end());
+			lines.pop_back();
+		} else {
+			// Circle
+			// ...
+		}
+	}
+
+	list<list<dvec2>> points;
+	for (auto &line : lines) {
+		points.emplace_back();
+		for (auto &neighbour : line)
+			points.back().push_back(pointTowards(neighbour));
+	}
+	return points;
 }
 
 glm::ivec2 Points::blockFromIndex(int i)
