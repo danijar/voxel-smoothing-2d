@@ -11,7 +11,7 @@ using namespace sf;
 
 Field::Field(Blocks* blocks, int resolution) : m_blocks(blocks), m_points(m_blocks), m_resolution(resolution)
 {
-	// initialize data
+	// Initialize data
 	clear();
 	m_texture.loadFromImage(m_image);
 	m_sprite.setTexture(m_texture);
@@ -24,21 +24,24 @@ void Field::clear()
 
 void Field::draw()
 {
-	// clear texture
+	// Clear texture
 	clear();
 
-	// loop over blocks
+	// Draw grid
+	draw::grid(m_image, m_resolution);
+
+	// Loop over blocks
 	ivec2 index;
 	for (index.x = 0; index.x < m_blocks->get_size().x; index.x++) {
 		for (index.y = 0; index.y < m_blocks->get_size().y; index.y++) {
-			// draw blocks
+			// Draw blocks
 			if (m_blocks->get(index))
 				draw::square(m_image, coordinates(index).x, coordinates(index).y, 4);
 
-			// fetch points
+			// Fetch points
 			auto lines = m_points.find(index);
 
-			// draw pts
+			// Draw pts
 			for (auto line : lines) {
 				auto i = line.begin();
 				ivec2 last_point = coordinates(index, *i);
@@ -54,10 +57,7 @@ void Field::draw()
 		}
 	}
 
-	// draw grid
-	draw::grid(m_image, m_resolution);
-
-	// update texture
+	// Update texture
 	m_texture.loadFromImage(m_image);
 }
 
@@ -66,7 +66,7 @@ void Field::click(int X, int Y)
 	// Calculate block from coordinates
 	ivec2 block;
 	Vector2f offset = m_sprite.getPosition();
-	Vector2f size = static_cast<float>(m_resolution) * m_sprite.getScale();
+	Vector2f size = static_cast<float>(m_resolution)* m_sprite.getScale();
 	block.x = static_cast<int>((X - offset.x) / size.x);
 	block.y = static_cast<int>((Y - offset.y) / size.y);
 
