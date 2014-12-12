@@ -43,15 +43,16 @@ void Field::draw()
 			auto lines = m_points.find(index);
 
 			// Draw pts
+			Color controls_color(60, 200, 60);
 			for (auto line : lines) {
 				auto i = line.begin();
 				ivec2 last_point = coordinates(index, *i);
 				ivec2 current_point;
-				//draw::dot(m_image, last_point.x, last_point.y);
+				draw::dot(m_image, last_point.x, last_point.y, 4, controls_color);
 				for (++i; i != line.end(); ++i) {
 					current_point = coordinates(index, *i);
-					//draw::line(m_image, last_point.x, last_point.y, current_point.x, current_point.y, Color(215, 215, 215));
-					//draw::dot(m_image, current_point.x, current_point.y);
+					draw::line(m_image, last_point.x, last_point.y, current_point.x, current_point.y, controls_color);
+					draw::dot(m_image, current_point.x, current_point.y, 4, controls_color);
 					last_point = current_point;
 				}
 				list<dvec2> points;
