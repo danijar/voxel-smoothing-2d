@@ -1,5 +1,6 @@
 #include "field.h"
 
+#include <list>
 #include <glm/glm.hpp>
 
 #include "draw.h"
@@ -46,13 +47,17 @@ void Field::draw()
 				auto i = line.begin();
 				ivec2 last_point = coordinates(index, *i);
 				ivec2 current_point;
-				draw::dot(m_image, last_point.x, last_point.y, 2);
+				draw::dot(m_image, last_point.x, last_point.y);
 				for (++i; i != line.end(); ++i) {
 					current_point = coordinates(index, *i);
-					draw::line(m_image, last_point.x, last_point.y, current_point.x, current_point.y);
+					draw::line(m_image, last_point.x, last_point.y, current_point.x, current_point.y, Color(215, 215, 215));
 					draw::dot(m_image, current_point.x, current_point.y);
 					last_point = current_point;
 				}
+				list<dvec2> points;
+				for (auto i : line)
+					points.push_back(coordinates(index, i));
+				draw::bezier(m_image, points, 15, Color::Green);
 			}
 		}
 	}

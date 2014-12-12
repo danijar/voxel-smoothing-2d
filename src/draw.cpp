@@ -1,5 +1,10 @@
 #include "draw.h"
+
+#include <iostream>
+
 using namespace std;
+using namespace glm;
+
 
 namespace draw {
 
@@ -65,11 +70,28 @@ void line(sf::Image &image, int fromx, int fromy, int tox, int toy, sf::Color co
 	}
 }
 
-void bezier(sf::Image &image, vector<pair<int, int>> points, int samples, sf::Color color)
+void bezier(sf::Image &image, list<dvec2> &points, int resolution, sf::Color color)
 {
-	// For now, just draw a straight line
-	for (auto point : points) {
+	// Sample curve points
+	list<dvec2> samples;
+	double step = 1.0 / resolution;
+	for (double time = 0.0; time <= 1.0; time += step) {
+		list<dvec2> sliders = points;
+		while (sliders.size() > 1)
+			sliders = detail::slide(sliders, time);
+		samples.push_back(sliders.front());
+	}
 
+	// Draw curve by connection samples with small lines
+	auto i = samples.begin();
+	dvec2 last = *i++;
+	for (; i != samples.end(); ++i) {
+		int fromx = static_cast<int>(last.x);
+		int fromy = static_cast<int>(last.y);
+		int tox = static_cast<int>(i->x);
+		int toy = static_cast<int>(i->y);
+		line(image, fromx, fromy, tox, toy, color);
+		last = *i;
 	}
 }
 
@@ -95,6 +117,16 @@ int sign(int from, int to)
 {
 	int difference = to - from;
 	return (difference < 0) ? -1 : (difference > 0) ? 1 : 0;
+}
+
+list<dvec2> slide(list<dvec2> &points, double time)
+{
+	list<dvec2> result;
+	auto current = points.begin();
+	dvec2 last = *current;
+	for (++current; current != points.end(); ++current)
+		result.push_back(last * time + *current * (1.0 - time));
+	return result;
 }
 
 } // namespace detail
