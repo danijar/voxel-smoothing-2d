@@ -116,7 +116,6 @@ dvec2 Points::pointTowards(ivec2 neighbour)
 	dvec2 point;
 	point.x = static_cast<double>(neighbour.x);
 	point.y = static_cast<double>(neighbour.y);
-	point *= .8;
 
 	// Convert from neighbour space into
 	// drawing space of the block

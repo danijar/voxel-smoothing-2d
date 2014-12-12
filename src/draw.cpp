@@ -103,7 +103,7 @@ void grid(sf::Image &image, int resolution, sf::Color color)
 	// Draw rows
 	for (size_t j = 0; j < size.y; j += resolution)
 	for (size_t i = 0; i < size.x; ++i)
-		image.setPixel(i, j, sf::Color(127, 127, 127));
+		image.setPixel(i, j, color);
 
 	// Draw columns
 	for (size_t i = 0; i < size.x; i += resolution)
@@ -124,8 +124,10 @@ list<dvec2> slide(list<dvec2> &points, double time)
 	list<dvec2> result;
 	auto current = points.begin();
 	dvec2 last = *current;
-	for (++current; current != points.end(); ++current)
+	for (++current; current != points.end(); ++current) {
 		result.push_back(last * time + *current * (1.0 - time));
+		last = *current;
+	}
 	return result;
 }
 

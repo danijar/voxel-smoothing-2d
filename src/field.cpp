@@ -20,7 +20,7 @@ Field::Field(Blocks* blocks, int resolution) : m_blocks(blocks), m_points(m_bloc
 
 void Field::clear()
 {
-	m_image.create(m_blocks->get_size().x * m_resolution + 1, m_blocks->get_size().y * m_resolution + 1, Color(0, 0, 0));
+	m_image.create(m_blocks->get_size().x * m_resolution + 1, m_blocks->get_size().y * m_resolution + 1, Color::White);
 }
 
 void Field::draw()
@@ -29,15 +29,15 @@ void Field::draw()
 	clear();
 
 	// Draw grid
-	draw::grid(m_image, m_resolution);
+	draw::grid(m_image, m_resolution, Color(230, 230, 230));
 
 	// Loop over blocks
 	ivec2 index;
 	for (index.x = 0; index.x < m_blocks->get_size().x; index.x++) {
 		for (index.y = 0; index.y < m_blocks->get_size().y; index.y++) {
 			// Draw blocks
-			if (m_blocks->get(index))
-				draw::square(m_image, coordinates(index).x, coordinates(index).y, 4);
+			//if (m_blocks->get(index))
+			//	draw::square(m_image, coordinates(index).x, coordinates(index).y, 4);
 
 			// Fetch points
 			auto lines = m_points.find(index);
@@ -47,17 +47,18 @@ void Field::draw()
 				auto i = line.begin();
 				ivec2 last_point = coordinates(index, *i);
 				ivec2 current_point;
-				draw::dot(m_image, last_point.x, last_point.y);
+				//draw::dot(m_image, last_point.x, last_point.y);
 				for (++i; i != line.end(); ++i) {
 					current_point = coordinates(index, *i);
-					draw::line(m_image, last_point.x, last_point.y, current_point.x, current_point.y, Color(215, 215, 215));
-					draw::dot(m_image, current_point.x, current_point.y);
+					//draw::line(m_image, last_point.x, last_point.y, current_point.x, current_point.y, Color(215, 215, 215));
+					//draw::dot(m_image, current_point.x, current_point.y);
 					last_point = current_point;
 				}
 				list<dvec2> points;
+				double spread = 1.0;
 				for (auto i : line)
-					points.push_back(coordinates(index, i));
-				draw::bezier(m_image, points, 15, Color::Green);
+					points.push_back(coordinates(index, i * spread));
+				draw::bezier(m_image, points, 30, Color::Black);
 			}
 		}
 	}

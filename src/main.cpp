@@ -43,7 +43,7 @@ int main()
 		}
 
 		// Draw sprite
-		window.clear();
+		window.clear(Color::White);
 		window.draw(*field.sprite());
 		window.display();
 	}
