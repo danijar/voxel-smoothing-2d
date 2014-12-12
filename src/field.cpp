@@ -19,7 +19,7 @@ Field::Field(Blocks* blocks, int resolution) : m_blocks(blocks), m_points(m_bloc
 
 void Field::clear()
 {
-	m_image.create(m_blocks->X() * m_resolution + 1, m_blocks->Y() * m_resolution + 1, Color(0, 0, 0));
+	m_image.create(m_blocks->get_size().x * m_resolution + 1, m_blocks->get_size().y * m_resolution + 1, Color(0, 0, 0));
 }
 
 void Field::draw()
@@ -29,11 +29,11 @@ void Field::draw()
 
 	// loop over blocks
 	ivec2 index;
-	for (index.x = 0; index.x < m_blocks->X(); index.x++) {
-		for (index.y = 0; index.y < m_blocks->Y(); index.y++) {
+	for (index.x = 0; index.x < m_blocks->get_size().x; index.x++) {
+		for (index.y = 0; index.y < m_blocks->get_size().y; index.y++) {
 			// draw blocks
-			if (m_blocks->Get(index.x, index.y))
-				draw::square(m_image, coordinates(index.x), coordinates(index.y), 4);
+			if (m_blocks->get(index))
+				draw::square(m_image, coordinates(index).x, coordinates(index).y, 4);
 
 			// fetch points
 			auto lines = m_points.find(index);
@@ -41,12 +41,14 @@ void Field::draw()
 			// draw pts
 			for (auto line : lines) {
 				auto i = line.begin();
-				dvec2 last = *i;
-				draw::dot(m_image, coordinates(index.x, last.x), coordinates(index.y, last.y), 2);
+				ivec2 last_point = coordinates(index, *i);
+				ivec2 current_point;
+				draw::dot(m_image, last_point.x, last_point.y, 2);
 				for (++i; i != line.end(); ++i) {
-					draw::line(m_image, coordinates(index.x, last.x), coordinates(index.y, last.y), coordinates(index.x, i->x), coordinates(index.y, i->y));
-					draw::dot(m_image, coordinates(index.x, i->x), coordinates(index.y, i->y), 2);
-					last = *i;
+					current_point = coordinates(index, *i);
+					draw::line(m_image, last_point.x, last_point.y, current_point.x, current_point.y);
+					draw::dot(m_image, current_point.x, current_point.y);
+					last_point = current_point;
 				}
 			}
 		}
@@ -61,14 +63,15 @@ void Field::draw()
 
 void Field::click(int X, int Y)
 {
-	// calculate block from coordinates
+	// Calculate block from coordinates
+	ivec2 block;
 	Vector2f offset = m_sprite.getPosition();
 	Vector2f size = static_cast<float>(m_resolution) * m_sprite.getScale();
-	int i = static_cast<int>((X - offset.x) / size.x);
-	int j = static_cast<int>((Y - offset.y) / size.y);
+	block.x = static_cast<int>((X - offset.x) / size.x);
+	block.y = static_cast<int>((Y - offset.y) / size.y);
 
-	// toggle block
-	m_blocks->Set(i, j, m_blocks->Get(i, j) ? 0 : 1);
+	// Toggle block
+	m_blocks->set(block, m_blocks->get(block) ? 0 : 1);
 }
 
 Sprite* Field::sprite()
@@ -76,7 +79,7 @@ Sprite* Field::sprite()
 	return &m_sprite;
 }
 
-int Field::coordinates(int block, double offset)
+ivec2 Field::coordinates(ivec2 block, dvec2 offset)
 {
-	return block * m_resolution + int(offset * m_resolution);
+	return block * m_resolution + ivec2(offset * dvec2(m_resolution));
 }

@@ -14,7 +14,7 @@ public:
 	void click(int X, int Y);
 	sf::Sprite* sprite();
 private:
-	int coordinates(int block, double offset = 0.5);
+	glm::ivec2 coordinates(glm::ivec2 block, glm::dvec2 offset = glm::dvec2(0.5));
 	void set(int X, int Y, uint8_t value = 1);
 	uint8_t get(int X, int Y);
 

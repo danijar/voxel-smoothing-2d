@@ -2,12 +2,9 @@
 #include "blocks.h"
 #include "points.h"
 #include "field.h"
+
 using namespace sf;
 
-// Debug
-#include <iostream>
-#include "draw.h"
-using namespace std;
 
 int main()
 {
@@ -15,8 +12,8 @@ int main()
 	RenderWindow window(VideoMode(651, 331), "Voxel Smoothing 2D");
 	
 	// Intialization
-	Blocks blocks(20, 10);
-	blocks.Random();
+	Blocks blocks(glm::ivec2(20, 10));
+	blocks.fill_randomly();
 	Field field(&blocks);
 	field.sprite()->setPosition(5, 5);
 	field.draw();

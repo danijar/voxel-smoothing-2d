@@ -14,15 +14,15 @@ Points::Points(Blocks *blocks) : m_blocks(blocks)
 bool Points::check_old(ivec2 block)
 {
 	// Fetch neighbours
-	bool center = m_blocks->Is(block.x, block.y);
-	bool topleft = m_blocks->Is(block.x - 1, block.y - 1);
-	bool top = m_blocks->Is(block.x + 0, block.y - 1);
-	bool topright = m_blocks->Is(block.x + 1, block.y - 1);
-	bool right = m_blocks->Is(block.x + 1, block.y + 0);
-	bool bottomright = m_blocks->Is(block.x + 1, block.y + 1);
-	bool bottom = m_blocks->Is(block.x + 0, block.y + 1);
-	bool bottomleft = m_blocks->Is(block.x - 1, block.y + 1);
-	bool left = m_blocks->Is(block.x - 1, block.y + 0);
+	bool center      = m_blocks->is(block);
+	bool topleft     = m_blocks->is(block + ivec2(-1, -1));
+	bool top         = m_blocks->is(block + ivec2( 0, -1));
+	bool topright    = m_blocks->is(block + ivec2(+1, -1));
+	bool right       = m_blocks->is(block + ivec2(+1,  0));
+	bool bottomright = m_blocks->is(block + ivec2(+1, +1));
+	bool bottom      = m_blocks->is(block + ivec2( 0, +1));
+	bool bottomleft  = m_blocks->is(block + ivec2(-1, +1));
+	bool left        = m_blocks->is(block + ivec2(-1,  0));
 	bool *neighbours[] = { &bottomleft, &left, &topleft, &top, &topright, &right, &bottomright, &bottom, &bottomleft, &left, &topleft, &top };
 
 	// Is set
@@ -135,11 +135,11 @@ list<list<dvec2>> Points::find(ivec2 block)
 	
 	// Fetch blocks, neighbours start top left and count
 	// around the center block clock wise
-	int center = m_blocks->Get(block.x, block.y);
+	int center = m_blocks->get(block);
 	int neighs[8];
 	for (int i = 0; i < 8; i++) {
 		auto coord = blockFromIndex(i);
-		neighs[i] = m_blocks->Get(block.x + coord.x, block.y + coord.y);
+		neighs[i] = m_blocks->get(block + coord);
 	}
 
 	// Iterate over neighbour blocks

@@ -1,81 +1,74 @@
 #include "blocks.h"
 
 #include <cstdlib>
+
 using namespace std;
+using namespace glm;
 
-Blocks::Blocks(int X, int Y) : x(X), y(Y)
+Blocks::Blocks(ivec2 max) : m_max(max)
 {
-	// allocate memory for blocks
-	data = new uint8_t[x * y];
-	blocks = new uint8_t*[x];
-	for (size_t i = 0; i < x; ++i)
-		blocks[i] = data + y * i;
+	// Allocate memory for blocks
+	m_data = new uint8_t[m_max.x * m_max.y];
+	m_blocks = new uint8_t*[m_max.x];
+	for (int i = 0; i < m_max.x; ++i)
+		m_blocks[i] = m_data + m_max.y * i;
 
-	// initialize to zero
-	memset(data, 0, x * y * sizeof uint8_t);
+	// Initialize to zero
+	memset(m_data, 0, m_max.x * m_max.y * sizeof uint8_t);
 }
 
 Blocks::~Blocks()
 {
-	// free memory for blocks
-	delete[] blocks;
-	delete[] data;
+	// Free memory for blocks
+	delete[] m_blocks;
+	delete[] m_data;
 }
 
-void Blocks::Set(int X, int Y, uint8_t Value)
+void Blocks::set(glm::ivec2 block, uint8_t value)
 {
-	// check bounds
-	bool inside = (0 <= X && X < (int)x) && (0 <= Y && Y < (int)y);
-	if (!inside)
-		return;
-
-	// set block
-	blocks[X][Y] = Value;
+	// Set block if in range
+	if (in_range(block))
+		m_blocks[block.x][block.y] = value;
 }
 
-uint8_t Blocks::Get(int X, int Y, uint8_t Fallback)
+uint8_t Blocks::get(ivec2 block, uint8_t fallback)
 {
-	// check bounds
-	bool inside = (0 <= X && X < (int)x) && (0 <= Y && Y < (int)y);
-
-	// return value or fallback
-	if (inside)
-		return blocks[X][Y];
-	else
-		return Fallback;
+	// Return value if in range
+	if (in_range(block))
+		return m_blocks[block.x][block.y];
+	return fallback;
 }
 
-bool Blocks::Is(int X, int Y, bool Fallback)
+bool Blocks::is(ivec2 block, bool fallback)
 {
-	// check bounds
-	bool inside = (0 <= X && X < (int)x) && (0 <= Y && Y < (int)y);
-
-	// return value or fallback
-	if (inside)
-		return blocks[X][Y] != 0;
-	else
-		return Fallback;
+	// Return whether value if not zero if in range
+	if (in_range(block))
+		return (m_blocks[block.x][block.y] > 0);
+	return fallback;
 }
 
-uint8_t **Blocks::Pointer()
+uint8_t **Blocks::get_pointer()
 {
-	return blocks;
+	return m_blocks;
 }
 
-int Blocks::X()
+bool Blocks::in_range(ivec2 block)
 {
-	return x;
+	// Check bounds
+	bool inside_x = (0 <= block.x && block.x < static_cast<int>(m_max.x));
+	bool inside_y = (0 <= block.y && block.y < static_cast<int>(m_max.y));
+	return inside_x && inside_y;
 }
 
-int Blocks::Y()
+ivec2 Blocks::get_size()
 {
-	return y;
+	return m_max;
 }
 
-void Blocks::Random()
+void Blocks::fill_randomly()
 {
 	// loop over all blocks
-	for (size_t i = 0; i < x; ++i)
-	for (size_t j = 0; j < y; ++j)
-		blocks[i][j] = rand() % 100 < 25;
+	for (int i = 0; i < m_max.x; ++i)
+	for (int j = 0; j < m_max.y; ++j)
+		m_blocks[i][j] = rand() % 100 < 25;
 }

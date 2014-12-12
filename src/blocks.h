@@ -2,21 +2,22 @@
 
 #include <vector>
 #include <stdint.h>
+#include <glm/glm.hpp>
 
 class Blocks
 {
 public:
-	Blocks(int X, int Y);
+	Blocks(glm::ivec2 max);
 	~Blocks();
-	void Set(int X, int Y, uint8_t Value = 1);
-	uint8_t Get(int X, int Y, uint8_t Fallback = 1);
-	bool Is(int X, int Y, bool Fallback = true);
-	uint8_t **Pointer();
-	int X();
-	int Y();
-	void Random();
+	void set(glm::ivec2 block, uint8_t value = 1);
+	uint8_t get(glm::ivec2 block, uint8_t fallback = 1);
+	bool is(glm::ivec2 block, bool fallback = 1);
+	uint8_t **get_pointer();
+	bool in_range(glm::ivec2 block);
+	glm::ivec2 get_size();
+	void fill_randomly();
 private:
-	const size_t x, y;
-	uint8_t *data;
-	uint8_t **blocks;
+	const glm::ivec2 m_max;
+	uint8_t *m_data;
+	uint8_t **m_blocks;
 };
