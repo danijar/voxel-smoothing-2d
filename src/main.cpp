@@ -9,7 +9,7 @@ using namespace sf;
 int main()
 {
 	// Open window
-	RenderWindow window(VideoMode(651, 331), "Voxel Smoothing 2D");
+	RenderWindow window(VideoMode(1290, 650), "Voxel Smoothing 2D");
 	
 	// Intialization
 	Blocks blocks(glm::ivec2(20, 10));

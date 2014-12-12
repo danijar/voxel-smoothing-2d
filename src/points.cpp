@@ -11,122 +11,6 @@ Points::Points(Blocks *blocks) : m_blocks(blocks)
 
 }
 
-bool Points::check_old(ivec2 block)
-{
-	// Fetch neighbours
-	bool center      = m_blocks->is(block);
-	bool topleft     = m_blocks->is(block + ivec2(-1, -1));
-	bool top         = m_blocks->is(block + ivec2( 0, -1));
-	bool topright    = m_blocks->is(block + ivec2(+1, -1));
-	bool right       = m_blocks->is(block + ivec2(+1,  0));
-	bool bottomright = m_blocks->is(block + ivec2(+1, +1));
-	bool bottom      = m_blocks->is(block + ivec2( 0, +1));
-	bool bottomleft  = m_blocks->is(block + ivec2(-1, +1));
-	bool left        = m_blocks->is(block + ivec2(-1,  0));
-	bool *neighbours[] = { &bottomleft, &left, &topleft, &top, &topright, &right, &bottomright, &bottom, &bottomleft, &left, &topleft, &top };
-
-	// Is set
-	if (center)
-		return true;
-
-	// Is not set
-	else {
-		// Iterate over edges
-		for (int i = 3; i < 10; i += 2) {
-			// Get current and adjacent
-			bool *current = neighbours[i];
-			bool *overnext = neighbours[i + 2];
-
-			// Found consecutive edges
-			if (*current && *overnext)
-				return true;
-		}
-	}
-
-	return false;
-}
-
-list<dvec2> Points::find_old(ivec2 block)
-{
-	// Control points
-	list<dvec2> points;
-	/*
-	// Early skip
-	if (!check_old(block))
-		return points;
-
-	// Fetch neighbours
-	bool center = m_blocks->Is(block.x, block.y);
-	bool topleft = m_blocks->Is(block.x - 1, block.y - 1);
-	bool top = m_blocks->Is(block.x + 0, block.y - 1);
-	bool topright = m_blocks->Is(block.x + 1, block.y - 1);
-	bool right = m_blocks->Is(block.x + 1, block.y + 0);
-	bool bottomright = m_blocks->Is(block.x + 1, block.y + 1);
-	bool bottom = m_blocks->Is(block.x + 0, block.y + 1);
-	bool bottomleft = m_blocks->Is(block.x - 1, block.y + 1);
-	bool left = m_blocks->Is(block.x - 1, block.y + 0);
-	bool *neighbours[] = { &bottomleft, &left, &topleft, &top, &topright, &right, &bottomright, &bottom, &bottomleft, &left, &topleft, &top };
-
-	// Iterate over corners
-	for (int i = 2; i < 10; i += 2) {
-		// Get current and adjacent
-		bool *previous = neighbours[i - 1];
-		bool *current = neighbours[i];
-		bool *next = neighbours[i + 1];
-
-		// Skip neighbours of center type
-		if (*current == center)
-			continue;
-
-		// Skip points inside shape
-		if (!*current && ((*neighbours[i - 1] && *neighbours[i + 2]) || (*neighbours[i + 1] && *neighbours[i - 2]))) {
-			*current = !center;
-			continue;
-		}
-
-		// Skip lonely or enclosed neighbours
-		if (*previous == *next) {
-			*current = !center;
-			continue;
-		}
-
-		// Add point
-		points.push_back(pointTowards(i - 2));
-	}
-
-	// Iterate over sides
-	for (int i = 3; i < 10; i += 2) {
-		// Get current and adjacent
-		bool *previous = neighbours[i - 1];
-		bool *current = neighbours[i];
-		bool *next = neighbours[i + 1];
-
-		// Skip neighbours of center type
-		if (*current == center)
-			continue;
-
-		// Skip points inside shape
-		if (center && (*previous && *next))
-			continue;
-		if (!*current && ((*neighbours[i - 1] && *neighbours[i + 2]) || (*neighbours[i + 1] && *neighbours[i - 2]))) {
-			*current = !center;
-			continue;
-		}
-
-		// Skip lonely or enclosed neighbours
-		// Except a surrounding edge equals
-		if (*previous == *next && *current != *neighbours[i - 2] && *current != *neighbours[i + 2]) {
-			*current = !center;
-			continue;
-		}
-
-		// Add point
-		points.push_back(pointTowards(i - 2));
-	}
-	*/
-	return points;
-}
-
 list<list<dvec2>> Points::find(ivec2 block)
 {
 	// Control points
@@ -174,15 +58,14 @@ list<list<dvec2>> Points::find(ivec2 block)
 
 	// Merge last line with first if touching. This will not merge
 	// complete circles yet.
-	//lines.pop_back();
-	//lines.front().pop_front(); // First neighbour was an enclosed corner
 	if (neighs[0] != center && neighs[7] != center) {
 		if (lines.size() > 1) {
 			lines.front().insert(lines.front().begin(), line->begin(), line->end());
 			lines.pop_back();
 		} else {
-			// Circle
-			// ...
+			// Close circle
+			auto first_point = lines.front().front();
+			lines.front().push_back(first_point);
 		}
 	}
 
@@ -224,15 +107,5 @@ dvec2 Points::pointTowards(ivec2 neighbour)
 	point *= 0.5;
 	point += dvec2(.5);
 
-	return point;
-}
-
-dvec2 Points::pointTowards_old(int i)
-{
-	dvec2 point;
-	point.x = ((i + 7) % 8 < 4 ? 1 : -1) * ((i + 7) % 4 == 0 ? 0 : 1);
-	point.y = ((i + 5) % 8 < 4 ? 1 : -1) * ((i + 5) % 4 == 0 ? 0 : 1);
-	point.x = (.85 * point.x) * .5 + .5;
-	point.y = (.85 * point.y) * .5 + .5;
 	return point;
 }

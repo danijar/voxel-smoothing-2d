@@ -8,15 +8,13 @@
 
 class Field {
 public:
-	Field(Blocks* blocks, int resolution = 32);
+	Field(Blocks* blocks, int resolution = 64);
 	void clear();
 	void draw();
 	void click(int X, int Y);
 	sf::Sprite* sprite();
 private:
 	glm::ivec2 coordinates(glm::ivec2 block, glm::dvec2 offset = glm::dvec2(0.5));
-	void set(int X, int Y, uint8_t value = 1);
-	uint8_t get(int X, int Y);
 
 	Blocks* m_blocks;
 	::Points m_points;
