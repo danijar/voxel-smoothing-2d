@@ -30,8 +30,8 @@ list<list<dvec2>> Points::find(ivec2 block)
 	for (int i = 0; i < 8; i++) {
 		int current = neighs[i];
 		int next = neighs[(i + 1) % 8];
-		bool is_side   = (((i + 1) % 2) == 1);
-		bool is_corner = (((i + 1) % 2) == 0);
+		bool is_side   = (((i + 1) % 2) == 0);
+		bool is_corner = (((i + 1) % 2) == 1);
 
 		if (line) {
 			// Border between air and ground needs a line
@@ -40,15 +40,17 @@ list<list<dvec2>> Points::find(ivec2 block)
 				// stop a line
 				if (is_side || next == center)
 					line->push_back(blockFromIndex(i));
-			} else if (is_side || next == center) {
-				// Stop line since we found an end of the border
+			} else if (center || is_side || next == center) {
+				// Stop line since we found an end of the border. Always
+				// stop for ground blocks here, since they connect over
+				// corners so there must be open docking sites
 				line = nullptr;
 			}
 		} else {
 			// Start a new line for the border between air and ground that
-			// just appeared. However, skips lines that would only have one
-			// point, so we have to look at the next block, too.
-			if (current != center && next != center) {
+			// just appeared. However, corners get skipped if they don't
+			// end a line.
+			if (current != center) {
 				lines.emplace_back();
 				line = &lines.back();
 				line->push_back(blockFromIndex(i));
@@ -56,19 +58,33 @@ list<list<dvec2>> Points::find(ivec2 block)
 		}
 	}
 
-	// Merge last line with first if touching. This will not merge
-	// complete circles yet.
-	if (neighs[0] != center && neighs[7] != center) {
-		if (lines.size() > 1) {
-			lines.front().insert(lines.front().begin(), line->begin(), line->end());
-			lines.pop_back();
-		} else {
+	// Merge last line with first if touching. Only close around a differing corner for air
+	// blocks.
+	if (neighs[7] != center && (neighs[0] != center || (!center && neighs[1] != center))) {
+		// Skip first corner if enclosed
+		if (neighs[0] != center && neighs[1] != center)
+			lines.front().pop_front();
+		if (lines.size() == 1) {
 			// Close circle
 			auto first_point = lines.front().front();
 			lines.front().push_back(first_point);
+		} else {
+			// Insert last line into first one
+			lines.front().insert(lines.front().begin(), line->begin(), line->end());
+			lines.pop_back();
 		}
 	}
 
+	// Discard lines with too few points
+	auto i = lines.begin();
+	while (i != lines.end()) {
+		if (i->size() < 2)
+			lines.erase(i++);
+		else
+			++i;
+	}
+
+	// Convert to concrete points for output
 	list<list<dvec2>> points;
 	for (auto &line : lines) {
 		points.emplace_back();
@@ -100,7 +116,7 @@ dvec2 Points::pointTowards(ivec2 neighbour)
 	dvec2 point;
 	point.x = static_cast<double>(neighbour.x);
 	point.y = static_cast<double>(neighbour.y);
-	point *= .85;
+	point *= .75;
 
 	// Convert from neighbour space into
 	// drawing space of the block
