@@ -1,5 +1,12 @@
-SFML Application Frame
-======================
+Voxel Smoothing 2D
+==================
+
+This is the implementation of an algorithm for smoothing voxel structures, I
+designed. Even though this is a 3D problem, solving it in 2D is a first step.
+This application displays a grid where you can add or remove blocks with the
+mouse. The smoothed shape outline is rendered ontop.
+
+![Screenshot](screenshot/2014-12-12.png?raw=true)
 
 Instructions
 ------------
